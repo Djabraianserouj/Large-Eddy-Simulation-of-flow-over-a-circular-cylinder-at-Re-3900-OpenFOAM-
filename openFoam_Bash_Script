@@ -1,0 +1,37 @@
+#!/bin/bash -l 
+
+#PBS -N <give your job a name>
+#### allways request a complete node i.e.  ppn=40
+#PBS -l nodes=1:ppn=40
+
+### run the job for 24 hr.
+#PBS -l walltime=2:55:00
+
+### Mail to user informing start finish or abort 
+#PBS -M <PUT YOUR EMAIL ADDRESS> -m abe 
+
+### stderror file
+#PBS -e error.err
+
+#PBS -j eo
+
+# number of cores to use per node
+PPN=20
+
+# load environment module
+module load openfoam/5.0-trusty
+
+# change to working directory 
+cd ${PBS_O_WORKDIR}
+
+
+# count the number of nodes
+NODES=`uniq ${PBS_NODEFILE} | wc -l`
+# calculate the number of cores actually used
+CORES=$(( ${NODES} * ${PPN} ))
+
+
+# Please insert here your prefered solver executable!
+mpirun -np ${CORES} -npernode ${PPN} <SOLVER NAME> -parallel -fileHandler collated > logFile 2>&1
+
+#------------------------------------------------------------------------------
